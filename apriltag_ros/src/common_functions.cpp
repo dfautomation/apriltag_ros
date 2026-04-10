@@ -311,6 +311,12 @@ AprilTagDetectionArray TagDetector::detectTags (
     if (!findStandaloneTagDescription(tagID, standaloneDescription,
                                       !is_part_of_bundle))
     {
+      // Add the detection to the back of the tag detection array
+      AprilTagDetection tag_detection;
+      tag_detection.id.push_back(detection->id);
+      tag_detection.size.push_back(0);
+      tag_detection_array.detections.push_back(tag_detection);
+      detection_names.push_back(std::string());
       continue;
     }
 
@@ -393,6 +399,7 @@ AprilTagDetectionArray TagDetector::detectTags (
   // If set, publish the transform /tf topic
   if (publish_tf_) {
     for (unsigned int i=0; i<tag_detection_array.detections.size(); i++) {
+      if (detection_names[i].empty()) continue;
       geometry_msgs::PoseStamped pose;
       pose.pose = tag_detection_array.detections[i].pose.pose.pose;
       pose.header = tag_detection_array.detections[i].pose.header;
@@ -545,7 +552,7 @@ void TagDetector::drawDetections (cv_bridge::CvImagePtr image)
   {
     apriltag_detection_t *det;
     zarray_get(detections_, i, &det);
-
+#if 0
     // Check if this ID is present in config/tags.yaml
     // Check if is part of a tag bundle
     int tagID = det->id;
@@ -568,7 +575,7 @@ void TagDetector::drawDetections (cv_bridge::CvImagePtr image)
       // tag, skip it.
       continue;
     }
-
+#endif
     // Draw tag outline with edge colors green, blue, blue, red
     // (going counter-clockwise, starting from lower-left corner in
     // tag coords). cv::Scalar(Blue, Green, Red) format for the edge
